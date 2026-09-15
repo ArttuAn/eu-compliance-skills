@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ArttuAn/eu-compliance-skills/schema/compliance.schema.json",
+  "title": "Compliance brief",
+  "description": "The machine-readable spine produced by eu-grill-me and extended by every other skill. Every claim traces to a question or is marked as inferred.",
+  "type": "object",
+  "required": ["version", "generated_at", "subject", "roles", "regimes", "findings", "gate"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "generated_by": { "type": "string" },
+    "status": {
+      "description": "DERIVED, never authored. Recomputed on load from findings and confirmations.",
+      "enum": ["blocked", "conditional", "clear"]
+    },
+    "subject": {
+      "type": "object",
+      "required": ["product", "markets", "targets_eu_users"],
+      "properties": {
+        "product": { "type": "string" },
+        "description": { "type": "string" },
+        "repo": { "type": "string" },
+        "markets": { "type": "array", "items": { "type": "string", "pattern": "^[A-Z]{2}$" } },
+        "eu_establishment": { "type": "boolean" },
+        "targets_eu_users": { "type": "boolean" },
+        "headcount": { "type": "integer", "minimum": 0 },
+        "turnover_eur": { "type": "number", "minimum": 0 },
+        "balance_sheet_eur": { "type": "number", "minimum": 0 }
+      }
+    },
+    "roles": {
+      "type": "object",
+      "properties": {
+        "gdpr": { "enum": ["controller", "processor", "joint", "none"] },
+        "ai_act": { "enum": ["provider", "deployer", "importer", "distributor", "none"] },
+        "cra": { "enum": ["manufacturer", "open_source_steward", "none"] },
+        "dsa": { "enum": ["intermediary", "hosting", "platform", "marketplace", "none"] }
+      }
+    },
+    "data": { "type": "object" },
+    "ai": { "type": "object" },
+    "regimes": {
+      "type": "object",
+      "required": ["applicable", "ruled_out"],
+      "properties": {
+        "applicable": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["regime", "trigger"],
+            "properties": {
+              "regime": { "$ref": "#/$defs/regime" },
+              "trigger": { "type": "string" },
+              "deciding_facts": { "type": "array", "items": { "type": "string" } },
+              "open_question": { "type": "string" },
+              "duties_skill": { "type": "string" }
+            }
+          }
+        },
+        "ruled_out": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["regime", "reason", "deciding_fact", "expires_if"],
+            "description": "expires_if is mandatory: an exclusion is only valid while the fact that grounds it holds.",
+            "properties": {
+              "regime": { "$ref": "#/$defs/regime" },
+              "reason": { "type": "string" },
+              "deciding_fact": { "type": "string" },
+              "rule": { "type": "string" },
+              "confirmed_by": { "type": ["string", "null"] },
+              "expires_if": { "type": "string", "minLength": 3 }
+            }
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "description": "Append-only. Resolving sets status; the row survives.",
+      "items": {
+        "type": "object",
+        "required": ["id", "severity", "regime", "statement", "status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^F-\\d{3,}$" },
+          "severity": { "enum": ["blocker", "condition", "note"] },
+          "regime": { "$ref": "#/$defs/regime" },
+          "citation": { "type": "string" },
+          "question": { "type": "string" },
+          "statement": { "type": "string" },
+          "needs": { "type": "string" },
+          "owner": { "type": ["string", "null"] },
+          "due": { "type": ["string", "null"], "format": "date" },
+          "status": { "enum": ["open", "accepted", "resolved"] },
+          "resolved_note": { "type": "string" }
+        }
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "description": "A passing answer. VAGUE is not.",
+      "items": {
+        "type": "object",
+        "required": ["question", "owner", "due"],
+        "properties": {
+          "question": { "type": "string" },
+          "asked": { "type": "string" },
+          "owner": { "type": "string", "minLength": 2 },
+          "due": { "type": "string", "format": "date" },
+          "blocks": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "accepted_risks": {
+      "type": "array",
+      "description": "The escape hatch, and its receipt. An acceptance with no named human is a bypass.",
+      "items": {
+        "type": "object",
+        "required": ["finding", "accepted_by", "accepted_at", "rationale", "review_by"],
+        "properties": {
+          "finding": { "type": "string", "pattern": "^F-\\d{3,}$" },
+          "accepted_by": { "type": "string", "minLength": 3 },
+          "accepted_at": { "type": "string", "format": "date" },
+          "rationale": { "type": "string", "minLength": 10 },
+          "review_by": { "type": "string", "format": "date" }
+        }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "required": ["decision"],
+      "properties": {
+        "blockers_open": { "type": "integer", "minimum": 0 },
+        "conditions_open": { "type": "integer", "minimum": 0 },
+        "unknowns_open": { "type": "integer", "minimum": 0 },
+        "decision": { "enum": ["blocked", "conditional", "clear"] },
+        "reason": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "regime": {
+      "enum": ["gdpr", "eprivacy", "ai_act", "eaa", "cra", "nis2", "dsa",
+               "data_act", "dora", "pld", "mdr", "eidas"]
+    },
+    "source": {
+      "type": "object",
+      "description": "Every claim carries one. Inference must be labelled.",
+      "required": ["kind"],
+      "oneOf": [
+        { "properties": { "kind": { "const": "answered" }, "question": { "type": "string" } },
+          "required": ["question"] },
+        { "properties": { "kind": { "const": "inferred" }, "reasoning": { "type": "string", "minLength": 5 } },
+          "required": ["reasoning"] }
+      ]
+    }
+  }
+}

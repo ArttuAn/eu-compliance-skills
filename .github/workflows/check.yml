@@ -1,0 +1,51 @@
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  skills:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml jsonschema
+
+      - name: Validate skills
+        run: python3 tools/check_skills.py
+
+      - name: Check citations
+        run: python3 tools/check_citations.py
+
+      - name: Citation checker catches fabrication
+        run: |
+          # The negative control: a checker that never fails proves nothing.
+          cp skills/ai-act/SKILL.md /tmp/ai-act.bak
+          printf '\nArt. 214 GDPR requires a quarterly filing.\n' >> skills/ai-act/SKILL.md
+          if python3 tools/check_citations.py; then
+            echo "::error::citation checker did not catch a fabricated article"
+            exit 1
+          fi
+          cp /tmp/ai-act.bak skills/ai-act/SKILL.md
+
+      - name: Validate the brief schema
+        run: |
+          python3 - <<'PY'
+          import json, jsonschema
+          schema = json.load(open("schema/compliance.schema.json"))
+          jsonschema.Draft202012Validator.check_schema(schema)
+          print("schema is a valid JSON Schema")
+          PY
+
+      - name: Install into a scratch project
+        run: |
+          mkdir -p /tmp/scratch && cd /tmp/scratch
+          "$GITHUB_WORKSPACE/install.sh" --project
+          test -f .claude/commands/eu-grill-me.md
+          test -f .opencode/skills/eu-grill-me/SKILL.md
+          test -f .opencode/skills/eu-grill-me/references/verification.md
+          test -f .opencode/skills/eu-grill-me/schema/compliance.schema.json
