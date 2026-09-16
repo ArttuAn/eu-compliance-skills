@@ -77,3 +77,12 @@ Report applicable regimes with named authorities and portals, the earliest clock
 whether a drill has run, and **the longest vendor notice period in your DPAs** —
 that is the size of the hole in your 72 hours. Then run the drill at an
 inconvenient hour without warning and measure time-to-submittable-draft.
+
+
+Show certainty on every legal-grounded claim, in the brief and in what you say:
+each finding, each applicable or ruled-out regime, and the headline carry a
+`certainty` 0–100 — the exact percent of the assessment that rests on verified
+sources and confirmed facts — stated with the single largest reason it is not
+higher. `references/certainty.md` has the anchors; an open unknown caps at 70,
+an unread national transposition at 60, a counsel-pending classification at 50.
+Certainty never rescues a VAGUE answer or an open blocker.

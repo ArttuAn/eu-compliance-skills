@@ -4,12 +4,18 @@
   "title": "Compliance brief",
   "description": "The machine-readable spine produced by eu-grill-me and extended by every other skill. Every claim traces to a question or is marked as inferred.",
   "type": "object",
-  "required": ["version", "generated_at", "subject", "roles", "regimes", "findings", "gate"],
+  "required": ["version", "generated_at", "subject", "roles", "regimes", "findings", "gate", "certainty"],
   "additionalProperties": false,
   "properties": {
     "version": { "const": 1 },
     "generated_at": { "type": "string", "format": "date-time" },
     "generated_by": { "type": "string" },
+    "certainty": {
+      "description": "0-100. The honest percent of the whole assessment that rests on verified sources and confirmed facts. 100% requires every deciding fact SPECIFIC, every citation verified on EUR-Lex, every Directive transposition read, no counsel classification pending, and every regime in the map screened. See references/certainty.md.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
     "status": {
       "description": "DERIVED, never authored. Recomputed on load from findings and confirmations.",
       "enum": ["blocked", "conditional", "clear"]
@@ -52,6 +58,12 @@
             "properties": {
               "regime": { "$ref": "#/$defs/regime" },
               "trigger": { "type": "string" },
+              "certainty": {
+                "description": "0-100. How sure the trigger fact holds and the trigger citation is right. See references/certainty.md.",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              },
               "deciding_facts": { "type": "array", "items": { "type": "string" } },
               "open_question": { "type": "string" },
               "duties_skill": { "type": "string" }
@@ -70,7 +82,13 @@
               "deciding_fact": { "type": "string" },
               "rule": { "type": "string" },
               "confirmed_by": { "type": ["string", "null"] },
-              "expires_if": { "type": "string", "minLength": 3 }
+              "expires_if": { "type": "string", "minLength": 3 },
+              "certainty": {
+                "description": "0-100. How sure the exclusion holds. Dropping it later is how exclusions betray you. See references/certainty.md.",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              }
             }
           }
         }
@@ -81,7 +99,7 @@
       "description": "Append-only. Resolving sets status; the row survives.",
       "items": {
         "type": "object",
-        "required": ["id", "severity", "regime", "statement", "status"],
+        "required": ["id", "severity", "regime", "statement", "status", "certainty"],
         "properties": {
           "id": { "type": "string", "pattern": "^F-\\d{3,}$" },
           "severity": { "enum": ["blocker", "condition", "note"] },
@@ -93,7 +111,13 @@
           "owner": { "type": ["string", "null"] },
           "due": { "type": ["string", "null"], "format": "date" },
           "status": { "enum": ["open", "accepted", "resolved"] },
-          "resolved_note": { "type": "string" }
+          "resolved_note": { "type": "string" },
+          "certainty": {
+            "description": "0-100. The honest percent of the assessment that rests on verified sources and confirmed facts. Show it and the single largest reason it is not higher. See references/certainty.md.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          }
         }
       }
     },
@@ -149,9 +173,11 @@
       "description": "Every claim carries one. Inference must be labelled.",
       "required": ["kind"],
       "oneOf": [
-        { "properties": { "kind": { "const": "answered" }, "question": { "type": "string" } },
+        { "properties": { "kind": { "const": "answered" }, "question": { "type": "string" },
+                          "certainty": { "type": "integer", "minimum": 0, "maximum": 100 } },
           "required": ["question"] },
-        { "properties": { "kind": { "const": "inferred" }, "reasoning": { "type": "string", "minLength": 5 } },
+        { "properties": { "kind": { "const": "inferred" }, "reasoning": { "type": "string", "minLength": 5 },
+                          "certainty": { "type": "integer", "minimum": 0, "maximum": 100 } },
           "required": ["reasoning"] }
       ]
     }

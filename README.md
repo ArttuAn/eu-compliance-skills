@@ -39,7 +39,10 @@ produces.
 > Regulation or Directive, and every instrument is linked to its consolidated
 > text on EUR-Lex — [the full table is below](#primary-legal-sources). A claim
 > whose citation cannot be clicked through to a source is treated as a
-> fabrication, and CI rejects it before it reaches anyone.
+> fabrication, and CI rejects it before it reaches anyone. And nothing is stated
+> at a certainty it has not earned: every assessment carries a 0–100%
+> confidence, exposed in the brief and in what the agent says —
+> [see the scale](#certainty-you-can-read).
 
 ## The grill
 
@@ -228,6 +231,51 @@ Four Directives in the table — NIS2, ePrivacy, EAA and PLD — bind through
 NIS2. The regex skills cite the EU article and add *"as transposed in
 \<Member State\>"*; the national law, not this table, is the binding text.
 
+## Certainty you can read
+
+No part of an EU-compliance assessment is equally certain, and the repo refuses
+to pretend it is. **Every legal-grounded claim the agent makes carries a
+`certainty` as a percentage (0–100)** — the honest share of the assessment that
+rests on verified sources and confirmed facts, instead of inference, open
+unknowns and interpretation nobody has settled. The skills make it visible by
+contract: wherever the agent states an applicability, a classification, a
+citation-backed obligation or a finding, it shows the number and the single
+largest reason it is not higher.
+
+```text
+> Ruled out NIS2 — certainty 66%: the Art. 21 measures were not read against the
+> Finnish transposition law.
+>
+> F-002 condition — certainty 71%: the Annex III tier turns on counsel
+> confirmation and two open unknowns about the vendor.
+```
+
+Where the percentage comes from ([`references/certainty.md`](references/certainty.md)
+holds the full scale): `SPECIFIC` answers start at 95; facts read off the code at
+90; an assumed-but-unverified figure at 80; any assessment resting on an open
+`UNKNOWN` is capped at 70; a Directive whose **national transposition you have
+not read** at 60; a classification or lawful-basis determination pending counsel
+at 50 at most; legal text known to be **in flux and unverified** at 45. A claim
+is only as certain as its weakest verifying step — you take the minimum, never
+the average, so the number cannot hide a single unread requirement.
+
+`certainty: 100` is deliberately almost unreachable early in a project: it
+requires every deciding fact answered, every citation checked against EUR-Lex,
+every Directive transposition read, nothing in flux, no counsel confirmation
+pending — and that **every regime in the repo was explicitly screened**, applied
+or ruled out. The "did we neglect a regulation?" worry is not left to memory;
+unscreened regimes cap the headline and are named.
+
+Three guardrails keep the number honest:
+
+- **Certainty is visibility, not a free pass.** `UNKNOWN` passes and `VAGUE`
+  does not; an open blocker still blocks; a missing lawful basis stays missing.
+  A percentage never turns a gap into a finding.
+- **A low certainty is not a blocker**, it is a reason to name the missing
+  verification and its owner. Findings under 60 must state what would raise them.
+- **A certainty that never varies is broken.** If every assessment leaves the
+  interview at 90+, the scale is decoration and the report says so.
+
 ## Install
 
 ```bash
@@ -248,12 +296,15 @@ One artifact, two renderings: `compliance.yaml` (machine-readable, the spine) an
 `COMPLIANCE-BRIEF.md` (generated — never hand-edited, so the two cannot disagree).
 
 ```yaml
+certainty: 71             # 0-100 — the percent of the assessment you can trust; see below
+
 findings:
   - id: F-001
     severity: blocker
     regime: gdpr
     citation: "Art. 6(1)"
     question: A-11
+    certainty: 88
     statement: >
       No lawful basis identified for using historical applicant CVs as training
       data. The basis given for ranking was not assessed for the training
@@ -270,15 +321,19 @@ regimes:
       deciding_fact: "E-01: 28 staff, EUR 4.2M turnover"
       confirmed_by: "counsel, 2026-09-10"
       expires_if: "headcount >= 50 or turnover_eur > 10000000"
+      certainty: 66        # capped: the national transposition was not read
 ```
 
-Four rules the [schema](schema/compliance.schema.json) enforces:
+Five rules the [schema](schema/compliance.schema.json) enforces:
 
 - **Every claim carries a `source`** — `{kind: answered, question: A-07}` or
   `{kind: inferred, reasoning: "..."}`. A brief with untraceable claims is a
   fabrication wearing the clothes of a compliance record.
 - **`status` is derived, never typed.** If a human can set `clear` by editing the
   file, the gate is decorative.
+- **Every assessment carries a `certainty` 0–100** — the brief itself, every
+  applicable and ruled-out regime, and every finding. Nothing legal-grounded is
+  stated without the number and the reason it is not higher.
 - **Findings are append-only.** Resolving sets `status: resolved`; the row
   survives. The history *is* the accountability record (Art. 5(2) GDPR).
 - **Every exclusion carries `expires_if`.** "Below the NIS2 size cap" stops being
@@ -286,11 +341,12 @@ Four rules the [schema](schema/compliance.schema.json) enforces:
 
 ## The shared contracts
 
-Five documents the skills cite rather than restate.
+Six documents the skills cite rather than restate.
 
 | Reference | What it settles |
 | --- | --- |
 | [`how-to-ask.md`](references/how-to-ask.md) | The interrogation method: the answer-quality rubric, re-asking without being insufferable, the answers that sound like answers |
+| [`certainty.md`](references/certainty.md) | The 0–100 certainty scale: the anchors, what 100% requires, and the display rule the agent must follow |
 | [`regime-map.md`](references/regime-map.md) | Every regime, its trigger, its dates, its exposure, and what is usually *not* in scope |
 | [`legal-citations.md`](references/legal-citations.md) | Citation discipline, the source hierarchy, and what an agent may and may not conclude |
 | [`compliance-brief.md`](references/compliance-brief.md) | The brief schema, field by field, and why each rule exists |
@@ -306,6 +362,9 @@ produces the answer — and [`verification.md`](references/verification.md) does
 - No fabricated citations; no recital cited as a requirement; no legal conclusions.
 - A scripted "standard analytics, should be fine" grades `VAGUE`, gets re-asked,
   and is never recorded.
+- **Every assessment carries a `certainty` 0–100** — the brief, every applicable
+  and ruled-out regime, and every finding — and the number follows the scale in
+  `references/certainty.md`, not the agent's mood.
 - The gate blocks on an open blocker, and `status` cannot be hand-edited to clear.
 - **Two negative controls**: `fixtures/worst-case.yaml` must be **blocked**, and
   `fixtures/static-site.yaml` must be **clear**. A gate that passes the first is
@@ -337,12 +396,15 @@ Every skill carries the same six sections, and CI enforces it:
    "record the exclusion with `expires_if`" path.
 4. Every obligation carries a citation you could point to on EUR-Lex. If you
    cannot, say so — a true statement with `[citation needed]` beats a false one.
-5. Never state a date from memory. Cite it and instruct the reader to verify.
-6. `## Failure modes` and `## Verify` must correspond: every failure mode worth
+5. **Every assessment carries a `certainty` 0–100** per `references/certainty.md`
+   — the brief, every applicable and ruled-out regime, and every finding — and
+   the agent shows it with the single largest reason it is not higher.
+6. Never state a date from memory. Cite it and instruct the reader to verify.
+7. `## Failure modes` and `## Verify` must correspond: every failure mode worth
    naming should have a test that would catch it.
-7. Carry the "Not legal advice" notice once, near the top. Once — a document that
+8. Carry the "Not legal advice" notice once, near the top. Once — a document that
    hedges constantly teaches the reader to skip the hedges.
-8. Run `python3 tools/check_skills.py && python3 tools/check_citations.py`.
+9. Run `python3 tools/check_skills.py && python3 tools/check_citations.py`.
 
 ## Contributing
 

@@ -126,6 +126,20 @@ Stop when one of these is true, and not before or after:
 Do **not** stop because the person is tired, because the session is long, or
 because the remaining questions are uncomfortable. Those are the questions.
 
+## Grades drive certainty
+
+Every answer grade has a ceiling on the certainty it can support. This is not
+the full scale — see `references/certainty.md` — but it is how you translate an
+answer into a number while the interview is running.
+
+| Answer grade | Certainty ceiling | Why |
+| --- | --- | --- |
+| **SPECIFIC** | 95 | A concrete fact, ready to record — only stripped by a citation or verification gap downstream |
+| **ASSUMED** | 80 | Needs verification; the number caps at 80 until the task closes, and a closed-long-open unknown pulls it lower |
+| **UNKNOWN** | 70 at most | A fact nobody supplied; anything whose applicability turns on it is capped at 70 until the open unknown closes |
+| **VAGUE** | not recorded | "Standard stuff" never reaches the brief; re-ask, and if it stays vague it stays out |
+| **EVASIVE** | not recorded | Same as VAGUE — a redirected question is a gap, not a fact |
+
 ## Asking in an agent, not a meeting
 
 These skills run inside an IDE, which changes the mechanics:
@@ -155,3 +169,6 @@ Not a feeling of thoroughness. Three artifacts:
 3. A list of **open unknowns**, each with an owner and a date.
 
 If the interview produced confidence but not those three, it produced nothing.
+Confidence without a number is not a finding — every claim must also carry a
+`certainty` (0–100) tied to its source grade and verification state. See
+`references/certainty.md` for the anchors.

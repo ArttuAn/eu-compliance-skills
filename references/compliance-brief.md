@@ -33,6 +33,7 @@ version: 1
 generated_at: "2026-09-15T10:22:00Z"
 generated_by: "eu-grill-me 1.0"
 status: blocked            # blocked | conditional | clear
+certainty: 78              # 0-100 — see references/certainty.md for the anchors
 
 subject:
   product: "Hiring Copilot"
@@ -94,14 +95,14 @@ ai:
 
 regimes:
   applicable:
-    - {regime: gdpr, trigger: "processes applicant data, targets EU users"}
-    - {regime: ai_act, trigger: "provider of an AI system placed on the EU market"}
-    - {regime: eprivacy, trigger: "analytics on the careers site"}
+    - {regime: gdpr, trigger: "processes applicant data, targets EU users", certainty: 96}
+    - {regime: ai_act, trigger: "provider of an AI system placed on the EU market", certainty: 90}
+    - {regime: eprivacy, trigger: "analytics on the careers site", certainty: 71}
   ruled_out:
     - {regime: nis2, reason: "below the size cap and not in an Annex I/II sector",
        deciding_fact: "28 staff, SaaS for HR", confirmed_by: "counsel, 2026-09-10",
-       expires_if: "headcount >= 50 or turnover > 10M EUR"}
-    - {regime: dsa, reason: "hosts no third-party content", deciding_fact: "Q-21"}
+       expires_if: "headcount >= 50 or turnover > 10M EUR", certainty: 66}
+    - {regime: dsa, reason: "hosts no third-party content", deciding_fact: "Q-21", certainty: 92}
 
 findings:
   - id: F-001
@@ -109,6 +110,7 @@ findings:
     regime: gdpr
     citation: "Art. 6(1)"
     question: Q-11
+    certainty: 88                # 88% because the basis facts are answered, the citation is binding text
     statement: >
       No lawful basis has been identified for using historical applicant CVs as
       training data. The basis given for ranking (legitimate interests) was not
@@ -122,6 +124,7 @@ findings:
     regime: ai_act
     citation: "Annex III(4)(a)"
     question: Q-12
+    certainty: 71                # capped: classification must be confirmed by counsel
     statement: >
       The system ranks job applicants. Annex III(4)(a) covers AI intended for
       recruitment or selection. If confirmed, Chapter III obligations follow.
@@ -169,6 +172,16 @@ hire, and nothing will tell you unless the condition is written down and checked
 inferred, reasoning: "..."}`. The checker rejects a brief with claims that carry
 neither.
 
+**`certainty` on every assessment, always.** The top level, each applicable and
+`ruled_out` regime, and every finding carry `certainty` (0–100) — the honest
+percent of the assessment that rests on verified sources and confirmed facts
+rather than inference, open unknowns and interpretation. State it in the
+generated Markdown with the single largest reason it is not higher; a brief
+whose assessments show no certainty is a brief written in the voice of certainty
+it has not earned. `references/certainty.md` holds the anchors and the rules —
+including that `UNKNOWN` stays open and `VAGUE` stays rejected. A certainty never
+turns a missing basis into a found one.
+
 **`severity` has exactly three values, and they mean different things:**
 
 | Severity | Meaning | Effect on the gate |
@@ -210,4 +223,4 @@ shows the current state has thrown it away.
 will not open the YAML. Lead with the gate decision and the open blockers.
 Put the ruled-out regimes and their expiry conditions in full, because that is
 the section diligence actually reads. Put the answer trace in an appendix.
-Never render a claim without its source marker.
+Never render a claim without its source marker or its certainty.

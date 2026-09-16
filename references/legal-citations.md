@@ -157,7 +157,7 @@ lawyer:
 
 - Every `Art. N` reference names an instrument this repo knows about.
 - Article numbers fall within the real range for that instrument (GDPR ends at
-  99, the AI Act at 113, NIS2 at 45, the DSA at 93) — this catches the most
+  99, the AI Act at 113, NIS2 at 46, the DSA at 93) — this catches the most
   common fabrication, which is an article number past the end of the act.
 - No recital is cited with a requirement verb ("requires", "mandates",
   "obliges").
@@ -167,4 +167,7 @@ lawyer:
 
 These catch fabrication and overreach. They cannot catch a citation that exists
 but does not say what you claimed — only a human can, which is why findings name
-the article and quote what turns on it.
+the article and quote what turns on it. A citation that passes the checker but
+cannot be verified against the consolidated text on EUR-Lex lowers the
+`certainty` of whatever claim it supports — see `references/certainty.md` — and
+a finding whose certainty is below 60 must state what would raise it.

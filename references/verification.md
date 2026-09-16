@@ -51,6 +51,7 @@ distinguishes a gate from a form.
 | `test_ruled_out_carries_an_expiry_condition` | Every exclusion has `expires_if` and a deciding fact |
 | `test_brief_round_trips` | yaml → object → yaml is stable; the Markdown regenerates identically |
 | `test_dates_are_never_asserted_bare` | Any date in generated output carries a citation or a verification instruction |
+| `test_every_assessment_carries_certainty` | The brief top level, each applicable and ruled_out regime, and every finding have a `certainty` 0–100; nothing is stated without it |
 
 ### The per-skill set
 
@@ -107,6 +108,7 @@ Not metrics about the law. Metrics about the interview and the record.
 | **Inference share** | Share of claims marked `inferred` | < 0.3, and every one reviewed |
 | **Unknown closure** | Share of unknowns closed by their due date | tracked over time |
 | **Blocker precision** | Share of blockers a reviewing lawyer agrees were blockers | > 0.7 after review |
+| **Mean certainty** | Average `certainty` across all applicable regimes and open findings | tracked over time; low average after many sessions is a sign the scale is lying |
 
 Trace coverage is the gate. A brief with untraceable claims is a fabrication
 wearing the clothes of a compliance record, and it is worse than having no
@@ -139,6 +141,10 @@ Report what actually ran, not what it means:
 - Questions asked, answers by grade, unknowns left open with owners and dates.
 - Findings by severity, and what specifically is blocked.
 - Trace coverage and inference share.
+- **The headline certainty and what moves it** — unverified dates, unread
+  national transpositions, classifications pending counsel, open unknowns, and
+  the single largest reason the number is not higher. A user who sees "certainty
+  71%" should be able to ask why not 90 and get the same answer in one sentence.
 - **Which parts you could not verify** — every date you could not check against
   EUR-Lex, every national transposition you could not read, every classification
   that needs counsel.

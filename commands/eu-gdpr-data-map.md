@@ -68,3 +68,12 @@ generates and validates; `basis_confirmed_by` is required before `clear`.
 Report four numbers: schema fields vs mapped fields, purposes with an unconfirmed
 basis, fields with no deletion path, and whether the erasure test passes. Name
 every basis that is your reading rather than a confirmed decision.
+
+
+Show certainty on every legal-grounded claim, in the brief and in what you say:
+each finding, each applicable or ruled-out regime, and the headline carry a
+`certainty` 0–100 — the exact percent of the assessment that rests on verified
+sources and confirmed facts — stated with the single largest reason it is not
+higher. `references/certainty.md` has the anchors; an open unknown caps at 70,
+an unread national transposition at 60, a counsel-pending classification at 50.
+Certainty never rescues a VAGUE answer or an open blocker.

@@ -199,6 +199,20 @@ are a target group, in terms they can understand.
 by category and source; own-initiative moderation; complaints and outcomes;
 automated means used and their error rates.
 
+**Every assessment carries a certainty.** Each finding, each applicable or
+ruled-out regime, and the headline of the brief carry `certainty` (0–100) — the
+honest percent of the assessment that rests on verified sources and confirmed
+facts rather than inference, open unknowns and interpretation. Wherever you
+state an applicability, a classification, a citation-backed obligation or a
+finding, show the percentage **and the single largest reason it is not higher**:
+"ruled out NIS2 — certainty 66%: the national transposition was not read".
+`references/certainty.md` holds the anchors; the rules that matter here: an
+answer graded `UNKNOWN` caps anything resting on it at 70, an unread Directive
+transposition caps at 60, a classification pending counsel caps at 50, and a
+`100` requires every deciding fact SPECIFIC, every citation verified on EUR-Lex,
+every transposition read and every regime screened. Certainty is visibility, not
+a free pass — VAGUE stays rejected, an open blocker stays blocked.
+
 ## Failure modes
 
 - **"The DSA is for Big Tech."** Hosting duties have no size exemption. The

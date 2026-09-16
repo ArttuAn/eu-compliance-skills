@@ -78,3 +78,12 @@ the support period, whether the CVD contact has a named owner, and whether the
 drill has run. Then **send a report to your own published address from outside**
 and time how long it takes to reach a human who can act. That number is usually a
 surprise.
+
+
+Show certainty on every legal-grounded claim, in the brief and in what you say:
+each finding, each applicable or ruled-out regime, and the headline carry a
+`certainty` 0–100 — the exact percent of the assessment that rests on verified
+sources and confirmed facts — stated with the single largest reason it is not
+higher. `references/certainty.md` has the anchors; an open unknown caps at 70,
+an unread national transposition at 60, a counsel-pending classification at 50.
+Certainty never rescues a VAGUE answer or an open blocker.

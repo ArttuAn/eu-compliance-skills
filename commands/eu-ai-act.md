@@ -74,3 +74,12 @@ citation or a verify note.
 Report: prohibited screening result, role with Art. 25 reasoning, Annex III
 candidate, whether Art. 6(3) was claimed and why it is or is not available, and
 the count of unfilled Annex IV sections. Say which dates you could not verify.
+
+
+Show certainty on every legal-grounded claim, in the brief and in what you say:
+each finding, each applicable or ruled-out regime, and the headline carry a
+`certainty` 0–100 — the exact percent of the assessment that rests on verified
+sources and confirmed facts — stated with the single largest reason it is not
+higher. `references/certainty.md` has the anchors; an open unknown caps at 70,
+an unread national transposition at 60, a counsel-pending classification at 50.
+Certainty never rescues a VAGUE answer or an open blocker.
