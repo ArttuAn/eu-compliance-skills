@@ -17,6 +17,11 @@ it, and `tools/check_skills.py` enforces part of it mechanically.
 **Every obligation you state must carry a citation, and every citation must be
 one you could point to in the consolidated text on EUR-Lex.**
 
+Every instrument this repo cites, with its CELEX number and a clickable EUR-Lex
+link to the consolidated text, is in the **Primary legal sources** table at the
+top of the repository README. If the instrument is not there, you have not
+found a new regime — you have found an obligation to stop and verify.
+
 If you cannot, you have three honest options and none of them is to guess:
 
 1. State the obligation without an article number, and mark it `[citation

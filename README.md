@@ -33,6 +33,14 @@ produces.
 > or a Data Protection Officer. Their highest-value output is a brief that makes
 > an hour of a lawyer's time worth ten.
 
+> ### Grounded in primary law
+>
+> Every obligation a skill states maps to a concrete article of a named
+> Regulation or Directive, and every instrument is linked to its consolidated
+> text on EUR-Lex — [the full table is below](#primary-legal-sources). A claim
+> whose citation cannot be clicked through to a source is treated as a
+> fabrication, and CI rejects it before it reaches anyone.
+
 ## The grill
 
 You ask for a product. Before writing it, the agent finds out what it actually
@@ -182,6 +190,43 @@ does not catch it.**
 **They are honest about the model's cutoff.** EU timelines move — several were
 being amended while this was written. Dates are never asserted from memory; they
 carry a citation and an instruction to verify against EUR-Lex.
+
+## Primary legal sources
+
+Every rule in `skills/` was written against the consolidated text of the
+instrument it cites, not against a summary of it. This is the map: each row is
+what the repo means when it writes `Art. N <instrument>`, and the link is where
+you click to read the actual obligation.
+
+| Instrument | Number | EUR-Lex — consolidated text | Grounds |
+| --- | --- | --- | --- |
+| **GDPR** | Regulation (EU) 2016/679 | [CELEX 32016R0679](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32016R0679) | `eu-gdpr-data-map` — lawful basis, the Art. 30 record, retention and deletion; the spine every other skill runs on |
+| **AI Act** | Regulation (EU) 2024/1689 | [CELEX 32024R1689](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689) | `eu-ai-act` — Art. 5 prohibitions, provider/deployer role, Annex III tier, Chapter III duties |
+| **DSA** | Regulation (EU) 2022/2065 | [CELEX 32022R2065](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022R2065) | `eu-dsa-platform` — hosting layer, notice-and-action, ad and recommender constraints |
+| **CRA** | Regulation (EU) 2024/2847 | [CELEX 32024R2847](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R2847) | `eu-cra-secure-by-design` — SBOM, vulnerability handling, support period, reporting |
+| **NIS2** | Directive (EU) 2022/2555 | [CELEX 32022L2555](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022L2555) | `eu-nis2-readiness`, `eu-incident-response` — the ten Art. 21(2) measures and the 24h/72h/1mo clocks |
+| **ePrivacy** | Directive 2002/58/EC | [CELEX 32002L0058](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32002L0058) | `eu-consent-and-tracking` — anything written to or read from the device |
+| **EAA** | Directive (EU) 2019/882 | [CELEX 32019L0882](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32019L0882) | `eu-accessibility` — with EN 301 549 v3.2.1 as the harmonised standard |
+| **Data Act** | Regulation (EU) 2023/2854 | [CELEX 32023R2854](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R2854) | connected-product and cloud data-sharing obligations |
+| **DORA** | Regulation (EU) 2022/2554 | [CELEX 32022R2554](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022R2554) | ICT risk for regulated financial entities and their critical third parties |
+| **PLD** | Directive (EU) 2024/2853 | [CELEX 32024L2853](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024L2853) | defective-software product liability |
+| **MDR** | Regulation (EU) 2017/745 | [CELEX 32017R0745](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32017R0745) | software with a medical purpose |
+| **eIDAS 2** | Regulation (EU) 2024/1183 | [CELEX 32024R1183](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1183) | EU Digital Identity Wallet acceptance and issuance |
+
+Why the links matter: **pointing at the source is how a citation earns its
+authority.** `tools/check_citations.py` verifies mechanically that no `Art. N`
+exceeds the real last article of its act, that no recital is cited as a
+requirement, and that no legal conclusion is stated — but it cannot confirm that
+an article says what a finding claims. Only a human can, which is why every
+finding in a brief carries the same three parts: **the fact** (from an answer or
+the code), **the citation** (to a row above), and **the open question** (what a
+lawyer must confirm). Nothing here is an assertion of its own authority; every
+rule traces back to a source you can open.
+
+Four Directives in the table — NIS2, ePrivacy, EAA and PLD — bind through
+**national transposition**, which differs by Member State and has run late for
+NIS2. The regex skills cite the EU article and add *"as transposed in
+\<Member State\>"*; the national law, not this table, is the binding text.
 
 ## Install
 
