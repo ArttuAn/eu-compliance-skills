@@ -227,6 +227,17 @@ passage of time rather than with a commit: a due date passes, an accepted risk's
 review date arrives, a document goes stale. Run the gate nightly and open an
 issue rather than failing a build nobody triggered.
 
+**6. The hard constraint runs first.** Before any drift check, the brief must
+prove its own numbers: `python3 tools/hard_gate.py --brief compliance.yaml`
+derives every certainty from the `trace` and exits 2 on a number the trace
+cannot support. This is the deterministic back-end — the skill is the soft
+instruction; the tool is the gate. The user picks the policy each run:
+`--policy block` (default, CI), `--policy record` (agent, pre-build: appends an
+append-only finding per violation and normalizes the numbers), `--policy warn`
+(onboarding). `EU_COMPLIANCE_POLICY` can set the default. Whatever the policy,
+an inflated certainty, a no-trace brief, a fabricated article, a Directive
+without a Member State, and a recorded `VAGUE` are violations — not opinions.
+
 **Every assessment carries a certainty.** Each finding, each applicable or
 ruled-out regime, and the headline of the brief carry `certainty` (0–100) — the
 honest percent of the assessment that rests on verified sources and confirmed

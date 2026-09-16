@@ -79,8 +79,14 @@ a fabrication, which is worse than a gap.
 `compliance/compliance.yaml` (spine) + `COMPLIANCE-BRIEF.md` (generated). Every
 claim carries a `source` (`answered` with a question id, or `inferred` with
 reasoning). `status` is **derived, never typed**. Findings are append-only.
-Ruled-out regimes carry `expires_if`. Write incrementally — a session that dies
-at question 30 must not lose the first 29.
+Ruled-out regimes carry `expires_if`. The brief carries a **`trace`**
+(`screened_regimes`, `answers` with grades, `verifications` citation+CELEX+date,
+`directives` Member State + transposition-read, `confirmations` named human) —
+certainty is **derived from it by `tools/certainty_engine.py`, never typed**, and
+`tools/hard_gate.py` refuses a brief whose trace cannot support its numbers.
+Before building, run `python3 tools/hard_gate.py --brief compliance.yaml
+--policy record` (normalizes the numbers, records violations append-only). Write
+incrementally — a session that dies at question 30 must not lose the first 29.
 
 ## Verify
 

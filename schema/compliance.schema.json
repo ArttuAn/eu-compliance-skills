@@ -4,7 +4,7 @@
   "title": "Compliance brief",
   "description": "The machine-readable spine produced by eu-grill-me and extended by every other skill. Every claim traces to a question or is marked as inferred.",
   "type": "object",
-  "required": ["version", "generated_at", "subject", "roles", "regimes", "findings", "gate", "certainty"],
+  "required": ["version", "generated_at", "subject", "roles", "regimes", "findings", "gate", "certainty", "trace"],
   "additionalProperties": false,
   "properties": {
     "version": { "const": 1 },
@@ -160,6 +160,69 @@
         "unknowns_open": { "type": "integer", "minimum": 0 },
         "decision": { "enum": ["blocked", "conditional", "clear"] },
         "reason": { "type": "string" }
+      }
+    },
+    "trace": {
+      "type": "object",
+      "description": "The deterministic inputs every certainty is derived from -- tools/certainty_engine.py computes the numbers, tools/hard_gate.py refuses any number the trace cannot support. Manually-typed certainties are overridden on load.",
+      "required": ["screened_regimes", "answers"],
+      "properties": {
+        "screened_regimes": {
+          "type": "array",
+          "description": "Every regime explicitly screened -- applied or ruled out with a fact. A shortlist here means a regulation may have been neglected, which caps the headline at 90.",
+          "items": { "$ref": "#/$defs/regime" }
+        },
+        "answers": {
+          "type": "array",
+          "description": "The answer grades behind every question the brief references. VAGUE and EVASIVE are never recorded here.",
+          "items": {
+            "type": "object",
+            "required": ["question", "grade"],
+            "properties": {
+              "question": { "type": "string" },
+              "grade": { "enum": ["specific", "assumed", "unknown"] }
+            }
+          }
+        },
+        "verifications": {
+          "type": "array",
+          "description": "Citations actually checked against the consolidated text on EUR-Lex.",
+          "items": {
+            "type": "object",
+            "required": ["citation", "celex"],
+            "properties": {
+              "citation": { "type": "string" },
+              "celex": { "type": "string" },
+              "checked_on": { "type": "string", "format": "date" }
+            }
+          }
+        },
+        "directives": {
+          "type": "array",
+          "description": "Per-Directive national transposition state. A Directive cited without an entry here is a hard violation.",
+          "items": {
+            "type": "object",
+            "required": ["instrument", "member_state", "transposition_read"],
+            "properties": {
+              "instrument": { "type": "string" },
+              "member_state": { "type": "string", "pattern": "^[A-Z]{2}$" },
+              "transposition_read": { "type": "boolean" }
+            }
+          }
+        },
+        "confirmations": {
+          "type": "array",
+          "description": "Named human confirmations for the items that genuinely need interpretation. An item flagged requires_confirmation with no confirmation here is capped at 50.",
+          "items": {
+            "type": "object",
+            "required": ["item", "confirmed_by", "on"],
+            "properties": {
+              "item": { "type": "string" },
+              "confirmed_by": { "type": "string", "minLength": 3 },
+              "on": { "type": "string", "format": "date" }
+            }
+          }
+        }
       }
     }
   },

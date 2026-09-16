@@ -381,12 +381,22 @@ Non-negotiable properties:
   note. The history *is* the accountability record (Art. 5(2) GDPR).
 - **Ruled-out regimes carry `expires_if`** — the fact that would make them apply
   again. "Below the NIS2 size cap" stops being true at the 50th hire.
+- **The brief carries a `trace`** — `screened_regimes`, `answers` with grades,
+  `verifications` (citation + CELEX + date), `directives` (Member State,
+  transposition read or not), `confirmations` (named human, date). `certainty`
+  is **derived from this trace by `tools/certainty_engine.py`**, never typed.
+  A brief without a trace has no evidence from which to derive a number, and
+  `tools/hard_gate.py --policy block` refuses it — that is the deterministic
+  back end this repo ships.
 
 Write incrementally, as answers arrive. A session that dies at question 30 must
 not lose the first 29.
 
 Then hand off: `eu-applicability` fills the regime lists, and each regime skill
-appends its own findings.
+appends its own findings. Before building anything gated, run
+`python3 tools/hard_gate.py --brief compliance/compliance.yaml --policy record`
+— it normalizes the derived numbers and records any lingering violation
+append-only, and the recorded blocker is what stops the build, not a mood.
 
 **Every assessment carries a certainty.** Each finding, each applicable or
 ruled-out regime, and the headline of the brief carry `certainty` (0–100) — the

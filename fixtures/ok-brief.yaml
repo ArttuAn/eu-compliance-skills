@@ -1,0 +1,85 @@
+version: 1
+generated_at: "2026-09-16T09:00:00Z"
+generated_by: "eu-grill-me 1.0"
+status: conditional
+certainty: 80
+
+subject:
+  product: "Hiring Copilot"
+  description: "Ranks inbound applicants and drafts screening notes."
+  markets: [DE, FI]
+  eu_establishment: false
+  targets_eu_users: true
+  headcount: 28
+  turnover_eur: 4200000
+
+roles:
+  gdpr: controller
+  ai_act: provider
+  dsa: none
+
+regimes:
+  applicable:
+    - regime: gdpr
+      trigger: "processes applicant data, targets EU users"
+      question: A-01
+      certainty: 95
+    - regime: ai_act
+      trigger: "provider of an AI system placed on the EU market"
+      question: B-04
+      certainty: 80
+  ruled_out:
+    - regime: nis2
+      reason: "below the size cap and not in an Annex I/II sector"
+      deciding_fact: "E-01: 28 staff, SaaS for HR"
+      question: E-01
+      citation: "Art. 21(2)(d) NIS2"
+      confirmed_by: "counsel, 2026-09-10"
+      expires_if: "headcount >= 50 or turnover > 10M EUR"
+      certainty: 95
+
+findings:
+  - id: F-001
+    severity: blocker
+    regime: gdpr
+    citation: "Art. 6(1)"
+    question: A-11
+    certainty: 95
+    statement:
+      No lawful basis has been identified for using historical applicant CVs as
+      training data.
+    needs: "A documented basis per purpose."
+    owner: "Priya"
+    due: "2026-10-01"
+    status: open
+  - id: F-002
+    severity: condition
+    regime: ai_act
+    citation: "Annex III(4)(a)"
+    question: B-04
+    certainty: 80
+    statement: >
+      The system ranks job applicants; Annex III(4)(a) covers recruitment.
+    needs: "Classification confirmed by counsel before build."
+    owner: "counsel"
+    due: "2026-09-25"
+    status: open
+
+gate:
+  blockers_open: 1
+  decision: conditional
+
+trace:
+  screened_regimes: [gdpr, eprivacy, ai_act, eaa, cra, nis2, dsa, data_act,
+                     dora, pld, mdr, eidas]
+  answers:
+    - {question: A-01, grade: specific}
+    - {question: A-11, grade: specific}
+    - {question: B-04, grade: assumed}
+    - {question: E-01, grade: specific}
+  verifications:
+    - {citation: "Art. 6(1)", celex: "32016R0679", checked_on: "2026-09-16"}
+    - {citation: "Art. 21(2)(d) NIS2", celex: "32022L2555", checked_on: "2026-09-16"}
+  directives:
+    - {instrument: NIS2, member_state: FI, transposition_read: true}
+  confirmations: []

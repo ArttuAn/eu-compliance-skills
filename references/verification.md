@@ -24,10 +24,12 @@ uv pip install -e ".[dev]"          # or: pip install -e ".[dev]"
 python -c "import <package>"
 <command> --help
 <command> validate compliance.yaml  # the brief parses against the schema
+python3 tools/hard_gate.py --brief compliance.yaml   # the hard constraint, deterministic
 ```
 
 Catches: bad packaging, a schema that does not load, a CLI entry point pointing
-at a function that does not exist.
+at a function that does not exist, and a brief whose certainty its own trace
+cannot support.
 
 ## Tier 1 — the machinery behaves (offline, no key)
 
@@ -52,6 +54,7 @@ distinguishes a gate from a form.
 | `test_brief_round_trips` | yaml → object → yaml is stable; the Markdown regenerates identically |
 | `test_dates_are_never_asserted_bare` | Any date in generated output carries a citation or a verification instruction |
 | `test_every_assessment_carries_certainty` | The brief top level, each applicable and ruled_out regime, and every finding have a `certainty` 0–100; nothing is stated without it |
+| `test_certainty_derives_from_the_trace` | An inflated stored number is overridden on load and fails the hard gate; a brief with no `trace` fails; a Directive cited without a Member State fails; `record` policy is idempotent |
 
 ### The per-skill set
 

@@ -13,6 +13,7 @@ SKILLS_SRC="$ROOT/skills"
 COMMANDS_SRC="$ROOT/commands"
 REFERENCES_SRC="$ROOT/references"
 SCHEMA_SRC="$ROOT/schema"
+TOOLS_SRC="$ROOT/tools"
 
 OPENCODE_DEST="${OPENCODE_DEST:-}"
 CLAUDE_DEST="${CLAUDE_DEST:-}"
@@ -49,6 +50,9 @@ install_skills() {
     # Skills cite references/ and schema/ by relative path; ship them alongside.
     cp -R "$REFERENCES_SRC" "$OPENCODE_DEST/$name/references"
     cp -R "$SCHEMA_SRC" "$OPENCODE_DEST/$name/schema"
+    # The hard constraint ships with the skill it gates, so "record on drift"
+    # is a deterministic tool call, not another instruction.
+    cp -R "$TOOLS_SRC" "$OPENCODE_DEST/$name/tools"
     echo "  installed skill: $name"
   done
 }

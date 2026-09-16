@@ -61,6 +61,18 @@ the same pull request.
 make the gate pass: derive `status` rather than reading it, require a named human
 and a review date for acceptances, and put `compliance/` in CODEOWNERS.
 
+## The hard constraint runs first
+
+Before any drift check, the brief must prove its own numbers. Run
+`python3 tools/hard_gate.py --brief compliance/compliance.yaml` — it derives
+every certainty from the `trace` deterministically and **exits 2 on a number
+the trace cannot support**. The skill is the soft front-end; this tool is the
+gate. The user picks the policy each run: `--policy block` (CI default),
+`--policy record` (pre-build: append-only finding per violation, numbers
+normalized), `--policy warn` (onboarding). Inflated certainty, no trace, a
+fabricated article, a Directive without a Member State, a recorded `VAGUE` —
+all violations, exit 2, regardless of tone.
+
 ## Verify
 
 `pytest -q`: a new runtime vendor fails and a new dev dependency does not; an

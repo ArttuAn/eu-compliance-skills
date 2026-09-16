@@ -4,6 +4,14 @@ The single rule: **anywhere the agent states something legal-grounded, it shows
 its certainty as a percentage.** A claim without a certainty is a claim made in
 the voice of certainty the work has not earned.
 
+That percentage is **derived, never typed.** The agent records the evidence —
+answer grades, verification against EUR-Lex, directive transpositions read,
+counsel confirmations — in the brief's `trace`, and `tools/certainty_engine.py`
+computes the number. `tools/hard_gate.py` refuses a number the trace cannot
+support; a stored certainty that over-claims is a *failure*, not a preference.
+Same trace in, same number out, on any machine. This is what makes the scale
+deterministic for law purposes instead of a model's guess.
+
 This file is the scale. Every skill cites it, and the alternates are forbidden:
 a range ("70–90"), a hedge ("fairly sure"), or no number at all is a finding
 that has stopped being honest.
@@ -100,3 +108,23 @@ should be able to ask "why not higher?" and get the same answer the agent would.
 - **A certainty that never moves is broken.** If every assessment marches out at
   90+, the numbers are decoration; vary with the actual evidence and say so in
   the report.
+
+## What the engine needs from you (the trace)
+
+`tools/hard_gate.py` will refuse a brief that cannot prove its numbers. The
+brief's `trace` must therefore contain, for every item that carries a number:
+
+- **`answers`** — the grade (`specific | assumed | unknown`) for every question
+  the findings and regimes reference. `VAGUE` / `EVASIVE` in the trace is itself
+  a violation. A finding whose question has no entry cannot be derived.
+- **`verifications`** — every `citation` you relied on, matched by string, with
+  the CELEX number and the date you checked it. An unverified citation caps at
+  90; a fabricated citation fails outright.
+- **`directives`** — for every Directive cited (NIS2, ePrivacy, EAA, PLD): the
+  `member_state` and whether its national transposition was actually read.
+  Missing either fails; an unread one caps at 60.
+- **`confirmations`** — named human confirmations for items flagged
+  `requires_confirmation`; without one the item caps at 50.
+- **`screened_regimes`** — every regime you explicitly applied or ruled out.
+  A shortlist is exactly the "did we neglect a regulation?" failure: it caps the
+  headline at 90 and is reported by name.

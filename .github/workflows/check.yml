@@ -41,6 +41,62 @@ jobs:
           print("schema is a valid JSON Schema")
           PY
 
+      - name: Hard gate passes a trace-backed brief
+        run: python3 tools/hard_gate.py --brief fixtures/ok-brief.yaml
+
+      - name: Hard gate catches an inflated certainty (deterministic, not probabilistic)
+        run: |
+          # The negative control: a derived number must be earned, never chosen.
+          python3 - <<'PY'
+          import yaml
+          d = yaml.safe_load(open("fixtures/ok-brief.yaml"))
+          d["findings"][1]["certainty"] = 95        # trace earns 80 (assumed answer)
+          yaml.safe_dump(d, open("/tmp/override.yaml", "w"), sort_keys=False)
+          PY
+          if python3 tools/hard_gate.py --brief /tmp/override.yaml; then
+            echo "::error::hard gate did not catch an inflated certainty"; exit 1
+          fi
+          # --policy record blocks by recording, append-only, and normalizes the number.
+          python3 tools/hard_gate.py --brief /tmp/override.yaml --policy record >/dev/null
+          python3 - <<'PY'
+          import yaml
+          d = yaml.safe_load(open("/tmp/override.yaml"))
+          assert d["findings"][1]["certainty"] == 80, "certainty not normalized"
+          assert d["findings"][1]["question"] == "B-04"
+          assert any("hard-gate" in f["statement"] for f in d["findings"]), \
+              "drift was not recorded as an append-only finding"
+          # a second record run must be a no-op (idempotent)
+          import subprocess, sys
+          before = len(d["findings"])
+          subprocess.run([sys.executable, "tools/hard_gate.py", "--brief",
+                          "/tmp/override.yaml", "--policy", "record"], check=True)
+          after = len(yaml.safe_load(open("/tmp/override.yaml"))["findings"])
+          assert after == before, "record policy is not idempotent"
+          print("hard gate records drift deterministically")
+          PY
+
+      - name: Hard gate requires a trace and a Directive Member State
+        run: |
+          python3 - <<'PY'
+          import yaml, subprocess, sys
+          base = yaml.safe_load(open("fixtures/ok-brief.yaml"))
+          base.pop("trace")
+          yaml.safe_dump(base, open("/tmp/notrace.yaml", "w"), sort_keys=False)
+          r = subprocess.run([sys.executable, "tools/hard_gate.py", "--brief",
+                              "/tmp/notrace.yaml"], capture_output=True, text=True)
+          assert r.returncode != 0, "brief without a trace must fail"
+          assert "no trace" in r.stdout.lower()
+          base = yaml.safe_load(open("fixtures/ok-brief.yaml"))
+          base["trace"]["directives"] = [
+              {"instrument": "NIS2", "member_state": "FI", "transposition_read": False}]
+          yaml.safe_dump(base, open("/tmp/unread.yaml", "w"), sort_keys=False)
+          r = subprocess.run([sys.executable, "tools/hard_gate.py", "--brief",
+                              "/tmp/unread.yaml"], capture_output=True, text=True)
+          assert r.returncode != 0, "unread transposition must fail"
+          assert "transposition" in r.stdout.lower()
+          print("hard gate enforces trace and Directive transposition")
+          PY
+
       - name: Install into a scratch project
         run: |
           mkdir -p /tmp/scratch && cd /tmp/scratch

@@ -41,8 +41,11 @@ produces.
 > whose citation cannot be clicked through to a source is treated as a
 > fabrication, and CI rejects it before it reaches anyone. And nothing is stated
 > at a certainty it has not earned: every assessment carries a 0–100%
-> confidence, exposed in the brief and in what the agent says —
-> [see the scale](#certainty-you-can-read).
+> confidence, exposed in the brief and in what the agent says. And that number is
+> not a judgement call — it is **derived from the evidence in the brief's `trace`
+> by a deterministic engine**, and `tools/hard_gate.py` fails the build on a
+> number the trace cannot support —
+> [see the scale](#certainty-you-can-read) and [the gate](#certainty-derived-not-typed).
 
 ## The grill
 
@@ -276,6 +279,53 @@ Three guardrails keep the number honest:
 - **A certainty that never varies is broken.** If every assessment leaves the
   interview at 90+, the scale is decoration and the report says so.
 
+## Certainty: derived, not typed
+
+A skill *asking* the agent to be honest about its confidence is a soft
+instruction, and soft instructions fail exactly when it matters — under
+deadline, on the finding nobody wants to look at. So the number is not the
+agent's to pick. It is **derived from the brief's `trace` in code**, and the
+build is gated on it.
+
+```text
+compliance.yaml
+  trace:
+    screened_regimes: [gdpr, ai_act, nis2, eaa, cra, dsa, eprivacy, ...]
+    answers:      [{question: Q-12, grade: assumed}, ...]
+    verifications:[{citation: "Art. 6(1) GDPR", celex: 32016R0679, checked_on: ...}]
+    directives:   [{instrument: NIS2, member_state: FI, transposition_read: false}]
+    confirmations:[{item: F-002, confirmed_by: "Counsel", on: 2026-09-16}]
+        │
+        ▼
+  tools/certainty_engine.py   # minimum over the caps - never the average
+        │
+        ▼
+  every certainty, re-derived; 100 only if all six conditions hold
+        │
+        ▼
+  tools/hard_gate.py          # exit 2 on any number the trace cannot support
+```
+
+Three things make it a hard constraint rather than a prompt:
+
+- **`certainty` is overridden on load.** A number typed into the file that the
+  trace cannot support is replaced by the derived one, and the discrepancy is a
+  violation. Editing the brief to raise its confidence does not work.
+- **No `trace`, no number.** A brief without a trace fails outright — if there
+  is no evidence to derive from, there is nothing to trust. Same for a
+  Directive cited without a Member State, a `VAGUE` answer in the trace, a
+  citation not verified against EUR-Lex, and a regime never screened.
+- **The user chooses the enforcement point each run.** `--policy block` (default,
+  for CI), `--policy record` (pre-build: append-only finding per violation, then
+  normalize), `--policy warn` (onboarding). Or set `EU_COMPLIANCE_POLICY`.
+
+`tools/instruments.json` is the single source of truth for both the hard gate and
+`tools/check_citations.py`: it pins each instrument's CELEX number, type
+(Regulation or Directive) and real last article, so a citation cannot exceed a
+law that does not have that article, and a Directive cannot be treated like one
+that applies directly. CI runs the gate, then runs it again with a deliberately
+inflated certainty and fails if the gate does not catch it.
+
 ## Install
 
 ```bash
@@ -285,8 +335,9 @@ cd eu-compliance-skills
 ./install.sh --project                # or local: .opencode/skills + .claude/commands
 ```
 
-Skills land in your opencode config with the shared `references/` and `schema/`
-copied alongside each one; commands land in your Claude Code config.
+Skills land in your opencode config with the shared `references/`, `schema/` and
+the deterministic `tools/` (the certainty engine and hard gate) copied alongside
+each one; commands land in your Claude Code config.
 
 Then, in any project: `/eu-grill-me <what you want built>`.
 
@@ -322,18 +373,30 @@ regimes:
       confirmed_by: "counsel, 2026-09-10"
       expires_if: "headcount >= 50 or turnover_eur > 10000000"
       certainty: 66        # capped: the national transposition was not read
+
+trace:                     # the evidence every certainty is derived from
+  screened_regimes: [gdpr, ai_act, nis2, eaa, cra, dsa, eprivacy, data_act, dora, pld, mdr, eidas]
+  answers:      [{question: A-11, grade: specific}]
+  verifications: [{citation: "Art. 6(1) GDPR", celex: "32016R0679", checked_on: "2026-09-15"}]
+  directives:   [{instrument: NIS2, member_state: FI, transposition_read: false}]
+  confirmations: [{item: F-002, confirmed_by: "Counsel", on: "2026-09-16"}]
 ```
 
-Five rules the [schema](schema/compliance.schema.json) enforces:
+Six rules the [schema](schema/compliance.schema.json) enforces:
 
 - **Every claim carries a `source`** — `{kind: answered, question: A-07}` or
   `{kind: inferred, reasoning: "..."}`. A brief with untraceable claims is a
   fabrication wearing the clothes of a compliance record.
 - **`status` is derived, never typed.** If a human can set `clear` by editing the
   file, the gate is decorative.
-- **Every assessment carries a `certainty` 0–100** — the brief itself, every
-  applicable and ruled-out regime, and every finding. Nothing legal-grounded is
-  stated without the number and the reason it is not higher.
+- **Every assessment carries a `certainty` 0–100** — but it is **derived from the
+  `trace`, not typed**. The brief itself, every applicable and ruled-out regime,
+  and every finding carry it; `tools/certainty_engine.py` computes it and
+  `tools/hard_gate.py` refuses a number the trace cannot support.
+- **The brief carries a `trace`.** `screened_regimes`, `answers` with grades,
+  `verifications` (citation + CELEX + date checked), `directives` (Member State,
+  transposition read), `confirmations` (named human, date). No trace, no number —
+  this is the evidence every derived certainty rests on.
 - **Findings are append-only.** Resolving sets `status: resolved`; the row
   survives. The history *is* the accountability record (Art. 5(2) GDPR).
 - **Every exclusion carries `expires_if`.** "Below the NIS2 size cap" stops being
@@ -365,6 +428,10 @@ produces the answer — and [`verification.md`](references/verification.md) does
 - **Every assessment carries a `certainty` 0–100** — the brief, every applicable
   and ruled-out regime, and every finding — and the number follows the scale in
   `references/certainty.md`, not the agent's mood.
+- **The certainty is derived, not typed**: `tools/hard_gate.py` overrides an
+  inflated number, rejects a brief with no `trace`, a Directive without a Member
+  State, a fabricated article and a recorded `VAGUE`, and normalizes
+  idempotently under `--policy record`.
 - The gate blocks on an open blocker, and `status` cannot be hand-edited to clear.
 - **Two negative controls**: `fixtures/worst-case.yaml` must be **blocked**, and
   `fixtures/static-site.yaml` must be **clear**. A gate that passes the first is
@@ -378,6 +445,7 @@ skills/grill-me/
 commands/eu-grill-me.md    # Claude Code slash-command edition
 references/*.md            # shared contracts, cited by every skill
 schema/compliance.schema.json
+tools/                     # certainty_engine.py, hard_gate.py, instruments.json, checkers
 ```
 
 Every skill carries the same six sections, and CI enforces it:
@@ -404,7 +472,8 @@ Every skill carries the same six sections, and CI enforces it:
    naming should have a test that would catch it.
 8. Carry the "Not legal advice" notice once, near the top. Once — a document that
    hedges constantly teaches the reader to skip the hedges.
-9. Run `python3 tools/check_skills.py && python3 tools/check_citations.py`.
+9. Run `python3 tools/check_skills.py && python3 tools/check_citations.py`, and
+   make sure a brief built by the skill passes `tools/hard_gate.py`.
 
 ## Contributing
 

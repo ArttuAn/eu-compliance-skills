@@ -95,12 +95,13 @@ ai:
 
 regimes:
   applicable:
-    - {regime: gdpr, trigger: "processes applicant data, targets EU users", certainty: 96}
-    - {regime: ai_act, trigger: "provider of an AI system placed on the EU market", certainty: 90}
-    - {regime: eprivacy, trigger: "analytics on the careers site", certainty: 71}
+    - {regime: gdpr, trigger: "processes applicant data, targets EU users", question: Q-01, certainty: 96}
+    - {regime: ai_act, trigger: "provider of an AI system placed on the EU market", question: Q-12, certainty: 90}
+    - {regime: eprivacy, trigger: "analytics on the careers site", question: Q-04, certainty: 71}
   ruled_out:
     - {regime: nis2, reason: "below the size cap and not in an Annex I/II sector",
-       deciding_fact: "28 staff, SaaS for HR", confirmed_by: "counsel, 2026-09-10",
+       deciding_fact: "28 staff, SaaS for HR", question: Q-20,
+       citation: "Art. 21(2)(d) NIS2", confirmed_by: "counsel, 2026-09-10",
        expires_if: "headcount >= 50 or turnover > 10M EUR", certainty: 66}
     - {regime: dsa, reason: "hosts no third-party content", deciding_fact: "Q-21", certainty: 92}
 
@@ -124,6 +125,7 @@ findings:
     regime: ai_act
     citation: "Annex III(4)(a)"
     question: Q-12
+    requires_confirmation: true   # interpretation -> capped at 50 until confirmed
     certainty: 71                # capped: classification must be confirmed by counsel
     statement: >
       The system ranks job applicants. Annex III(4)(a) covers AI intended for
@@ -153,6 +155,24 @@ gate:
   unknowns_open: 1
   decision: blocked
   reason: "F-001 is an open blocker."
+
+# The deterministic inputs every certainty is derived from. tools/certainty_engine.py
+# computes the numbers; tools/hard_gate.py refuses any number this cannot support.
+# Stored certainties are normalized on load -- typed numbers are overridden.
+trace:
+  screened_regimes: [gdpr, eprivacy, ai_act, eaa, cra, nis2, dsa, data_act,
+                     dora, pld, mdr, eidas]
+  answers:
+    - {question: Q-07, grade: specific}
+    - {question: Q-11, grade: specific}
+    - {question: Q-12, grade: assumed}
+    - {question: Q-16, grade: unknown}
+  verifications:
+    - {citation: "Art. 6(1) GDPR", celex: "32016R0679", checked_on: "2026-09-15"}
+  directives:
+    - {instrument: NIS2, member_state: FI, transposition_read: true}
+  confirmations:
+    - {item: F-002, confirmed_by: "Counsel", on: "2026-09-16"}
 ```
 
 ## Field notes that matter
@@ -181,6 +201,12 @@ whose assessments show no certainty is a brief written in the voice of certainty
 it has not earned. `references/certainty.md` holds the anchors and the rules —
 including that `UNKNOWN` stays open and `VAGUE` stays rejected. A certainty never
 turns a missing basis into a found one.
+
+**`certainty` is derived, never typed.** The agent writes the `trace`, and
+`tools/certainty_engine.py` computes the numbers; `tools/hard_gate.py` refuses a
+number the trace cannot support and normalizes the rest on load. A brief without
+a `trace` fails the gate outright: if there is no evidence from which to derive
+a number, there is no number to trust.
 
 **`severity` has exactly three values, and they mean different things:**
 

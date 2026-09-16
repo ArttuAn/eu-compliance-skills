@@ -12,11 +12,17 @@ references/legal-citations.md for the discipline it enforces.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+
+# The instrument registry is the single source of truth for article bounds and
+# regulation-vs-directive type -- tools/instruments.json. hard_gate.py enforces
+# the same bounds deterministically against the brief.
+_INSTRUMENTS = json.loads((ROOT / "tools" / "instruments.json").read_text(encoding="utf-8"))
 
 # Highest article number in each instrument. An article past the end is the most
 # common shape of a fabricated citation.
@@ -25,17 +31,7 @@ ROOT = Path(__file__).resolve().parent.parent
 # ("Art. 214 GDPR"), not policing the last article of each act -- a bound that is
 # a little too high lets one bad citation through, while a bound that is a little
 # too low fails the build on a real one, and nobody trusts the checker after that.
-LAST_ARTICLE = {
-    "GDPR": 99,
-    "AI Act": 113,
-    "NIS2": 46,
-    "DSA": 93,
-    "CRA": 75,
-    "DORA": 64,
-    "Data Act": 50,
-    "EAA": 35,
-    "ePrivacy": 21,
-}
+LAST_ARTICLE = {name: data["last_article"] for name, data in _INSTRUMENTS.items()}
 
 # Which instrument a file is primarily about, so bare "Art. N" can be checked too.
 # Most citations in a skill omit the instrument because the section already named it.
@@ -50,7 +46,7 @@ FILE_INSTRUMENT = {
 
 # "Art. 33(5) GDPR" / "Art. 21(2)(d) NIS2" / "Annex III(4)(a) AI Act"
 CITATION = re.compile(
-    r"Art\.\s*(\d+)(?:\([^)]*\))*\s+(GDPR|AI Act|NIS2|DSA|CRA|DORA|Data Act|EAA|ePrivacy)"
+    r"Art\.\s*(\d+)(?:\([^)]*\))*\s+(" + "|".join(map(re.escape, LAST_ARTICLE)) + r")"
 )
 # A bare "Art. N" with no instrument nearby is only acceptable inside a section
 # that already named one; we report it as a warning, not an error.
