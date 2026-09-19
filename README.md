@@ -483,6 +483,13 @@ new regimes. Open a PR against `main`; both checkers must pass.
 If you are a lawyer and something here is wrong, please open an issue — being
 wrong in public and fixed quickly is the design.
 
+## Related
+
+Three repositories, one scaffold: same skill format, same `install.sh`, same `tools/check_skills.py`.
+
+- [**agent-harness-skills**](https://github.com/ArttuAn/agent-harness-skills) — Skills for scaffolding the agent loop itself — ReAct, plan-and-execute, reflexion, multi-agent, code agent.
+- [**agent-memory-skills**](https://github.com/ArttuAn/agent-memory-skills) — Skills for what the agent remembers — working, episodic, semantic, procedural, graph and temporal memory, with an eval harness.
+
 ## License
 
 [MIT](LICENSE) — do anything you like, attribute politely.
