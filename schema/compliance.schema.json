@@ -56,6 +56,10 @@
             "type": "object",
             "required": ["regime", "trigger"],
             "properties": {
+              "source": { "$ref": "#/$defs/source" },
+              "requires_confirmation": { "type": "boolean" },
+              "asserts_date": { "type": "boolean" },
+              "question": { "type": "string" },
               "regime": { "$ref": "#/$defs/regime" },
               "trigger": { "type": "string" },
               "certainty": {
@@ -77,6 +81,10 @@
             "required": ["regime", "reason", "deciding_fact", "expires_if"],
             "description": "expires_if is mandatory: an exclusion is only valid while the fact that grounds it holds.",
             "properties": {
+              "source": { "$ref": "#/$defs/source" },
+              "requires_confirmation": { "type": "boolean" },
+              "asserts_date": { "type": "boolean" },
+              "question": { "type": "string" },
               "regime": { "$ref": "#/$defs/regime" },
               "reason": { "type": "string" },
               "deciding_fact": { "type": "string" },
@@ -101,6 +109,9 @@
         "type": "object",
         "required": ["id", "severity", "regime", "statement", "status", "certainty"],
         "properties": {
+          "source": { "$ref": "#/$defs/source" },
+          "requires_confirmation": { "type": "boolean" },
+          "asserts_date": { "type": "boolean" },
           "id": { "type": "string", "pattern": "^F-\\d{3,}$" },
           "severity": { "enum": ["blocker", "condition", "note"] },
           "regime": { "$ref": "#/$defs/regime" },

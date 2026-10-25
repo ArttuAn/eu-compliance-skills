@@ -21,6 +21,9 @@ jobs:
       - name: Validate skills
         run: python3 tools/check_skills.py
 
+      - name: Installer and gate security regressions
+        run: python3 -m unittest discover -s tests -v
+
       - name: Check citations
         run: python3 tools/check_citations.py
 
@@ -88,7 +91,7 @@ jobs:
           r = subprocess.run([sys.executable, "tools/hard_gate.py", "--brief",
                               "/tmp/notrace.yaml"], capture_output=True, text=True)
           assert r.returncode != 0, "brief without a trace must fail"
-          assert "no trace" in r.stdout.lower()
+          assert "no trace" in (r.stdout + r.stderr).lower()
           base = yaml.safe_load(open("fixtures/ok-brief.yaml"))
           base["trace"]["directives"] = [
               {"instrument": "NIS2", "member_state": "FI", "transposition_read": False}]
