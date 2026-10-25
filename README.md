@@ -493,3 +493,20 @@ Three repositories, one scaffold: same skill format, same `install.sh`, same `to
 ## License
 
 [MIT](LICENSE) — do anything you like, attribute politely.
+
+## Installer safety
+
+The installer validates the source before copying, refuses symlinks or junctions
+in source and destination paths, and refuses destinations that overlap source
+directories. Each file is replaced atomically; unrelated destination files are
+preserved. Removed upstream files are not automatically deleted: review obsolete
+files when upgrading. Install only into directories controlled by your user.
+
+The brief tools require `PyYAML` and `jsonschema` (`python3 -m pip install pyyaml
+jsonschema`). Both certainty entrypoints validate the local brief schema before
+deriving evidence. Briefs are limited to 1 MiB; duplicate YAML keys and aliases
+are rejected. An unknown `EU_COMPLIANCE_POLICY` stops the gate with exit code 2.
+Record mode replaces the brief atomically with owner-only permissions on POSIX
+and refuses linked paths. On Windows, restrict access with the directory ACL.
+Keep briefs in a private directory and exclude real personal data from Git;
+schema validation errors do not print the rejected values.

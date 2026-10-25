@@ -292,11 +292,17 @@ def main() -> int:
     except ImportError:
         print("PyYAML is required for the brief path", file=sys.stderr)
         return 2
-    brief = yaml.safe_load(Path(sys.argv[1]).read_text(encoding="utf-8"))
+    from brief_io import load_brief
+    brief = load_brief(Path(sys.argv[1]))
     result = derive_brief(brief)
     print(json.dumps(result, indent=2))
     return 0 if not result["violations"] else 1
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    from brief_io import BriefError
+    try:
+        raise SystemExit(main())
+    except (BriefError, OSError, ImportError):
+        print("Brief rejected; check its schema, path, and PyYAML/jsonschema dependencies", file=sys.stderr)
+        raise SystemExit(2)

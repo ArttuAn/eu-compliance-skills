@@ -30,6 +30,7 @@ import os
 import re
 import sys
 from pathlib import Path
+from brief_io import BriefError, load_brief, write_brief
 
 from certainty_engine import (
     VALID_GRADES,
@@ -49,14 +50,6 @@ SEVERITY = {
 
 def _norm(text: str) -> str:
     return " ".join(text.split())
-
-
-def load_brief(path: Path) -> dict:
-    try:
-        import yaml
-    except ImportError:
-        sys.exit("PyYAML is required (pip install pyyaml)")
-    return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
 def violations_of(brief: dict) -> list[dict]:
@@ -151,8 +144,6 @@ def heading_signature(statement: str) -> str:
 def write_record(brief: dict, violations: list[dict], path: Path) -> None:
     """Normalize every certainty to the derived value and append each violation
     once, append-only, as a finding whose severity drives the gate."""
-    import yaml
-
     derived = derive_brief(brief)
     for item_path, item in derived["items"].items():
         node = _item_pointer(brief, item_path)
@@ -188,7 +179,7 @@ def write_record(brief: dict, violations: list[dict], path: Path) -> None:
             "certainty": 95,
         })
 
-    path.write_text(yaml.safe_dump(brief, sort_keys=False), encoding="utf-8")
+    write_brief(path, brief)
 
 
 def main() -> int:
@@ -196,9 +187,12 @@ def main() -> int:
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--brief", required=True, help="path to compliance.yaml")
     parser.add_argument("--policy", choices=["block", "record", "warn"],
-                        default=os.environ.get("EU_COMPLIANCE_POLICY", "block"))
+                        default=None)
     parser.add_argument("--quiet", action="store_true")
     args = parser.parse_args()
+    args.policy = args.policy or os.environ.get("EU_COMPLIANCE_POLICY", "block")
+    if args.policy not in {"block", "record", "warn"}:
+        parser.error("EU_COMPLIANCE_POLICY must be block, record, or warn")
 
     path = Path(args.brief)
     brief = load_brief(path)
@@ -228,4 +222,9 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except (BriefError, OSError, ImportError) as exc:
+        print("HARD GATE refused the brief: " + (str(exc) if isinstance(exc, BriefError)
+              else "cannot access brief or required dependencies (PyYAML, jsonschema)"), file=sys.stderr)
+        raise SystemExit(2)
